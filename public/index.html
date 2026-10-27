@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My First MongoDB Web App</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 400px; margin: 30px auto; padding: 
+20px; border: 1px solid #ccc; border-radius: 8px; }
+    input, select, button { width: 100%; padding: 8px; margin: 6px 0; box-sizing: border-box; 
+}
+    button { background: #0284c7; color: white; border: none; border-radius: 4px; font
+weight: bold; cursor: pointer; }
+    ul { padding-left: 20px; }
+  </style>
+</head>
+<body>
+  <h2>Calculator + MongoDB</h2>
+  <input type="number" id="n1" placeholder="First Number">
+  <select id="op">
+    <option value="add">Add (+)</option>
+    <option value="subtract">Subtract (-)</option>
+    <option value="multiply">Multiply (*)</option>
+    <option value="divide">Divide (/)</option>
+  </select>
+  <input type="number" id="n2" placeholder="Second Number">
+  <button onclick="doCalculate()">Calculate & Save to DB</button>
+  <h3>Result: <span id="res">-</span></h3>
+  <h4>Recent Database Entries:</h4>
+  <ul id="history"></ul>
+  <script>
+    async function doCalculate() {
+      const num1 = document.getElementById('n1').value;
+      const num2 = document.getElementById('n2').value;
+      const operation = document.getElementById('op').value;
+      const res = await fetch('/api/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ num1, num2, operation })
+      });
+      const data = await res.json();
+      document.getElementById('res').innerText = data.result;
+      fetchHistory();
+    }
+    async function fetchHistory() {
+      const res = await fetch('/api/history');
+      const items = await res.json();
+      const list = document.getElementById('history');
+      list.innerHTML = '';
+      items.forEach(item => {
+        const li = document.createElement('li');
+        li.innerText = `${item.num1} ${item.operation} ${item.num2} = ${item.result}`;
+        list.appendChild(li);
+        });
+    }
+
+    loadHistory();
+  </script>
+</body>
+</html>
